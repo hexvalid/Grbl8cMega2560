@@ -1,22 +1,30 @@
 /*
-  settings.h - eeprom configuration handling 
+  settings.h - eeprom configuration handling
   Part of Grbl
 
+   The MIT License (MIT)
+
+  GRBL(tm) - Embedded CNC g-code interpreter and motion-controller
   Copyright (c) 2009-2011 Simen Svale Skogsrud
-  Copyright (c) 2011-2012 Sungeun K. Jeon
-  
-  Grbl is free software: you can redistribute it and/or modify
-  it under the terms of the GNU General Public License as published by
-  the Free Software Foundation, either version 3 of the License, or
-  (at your option) any later version.
+  Copyright (c) 2011-2013 Sungeun K. Jeon
 
-  Grbl is distributed in the hope that it will be useful,
-  but WITHOUT ANY WARRANTY; without even the implied warranty of
-  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-  GNU General Public License for more details.
+  Permission is hereby granted, free of charge, to any person obtaining a copy
+  of this software and associated documentation files (the "Software"), to deal
+  in the Software without restriction, including without limitation the rights
+  to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+  copies of the Software, and to permit persons to whom the Software is
+  furnished to do so, subject to the following conditions:
 
-  You should have received a copy of the GNU General Public License
-  along with Grbl.  If not, see <http://www.gnu.org/licenses/>.
+  The above copyright notice and this permission notice shall be included in
+  all copies or substantial portions of the Software.
+
+  THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+  IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+  FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+  AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+  LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+  OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
+  THE SOFTWARE.
 */
 
 #ifndef settings_h
@@ -25,7 +33,9 @@
 #include <math.h>
 #include "nuts_bolts.h"
 
-#define GRBL_VERSION "0.8c"
+/// date of construction
+#define GRBL_VERSION_BUILD "20140606"
+#define GRBL_VERSION "0.8c2"
 
 // Version of the EEPROM data. Will be used to migrate existing data from older versions of Grbl
 // when firmware is upgraded. Always stored in byte 0 of eeprom
@@ -40,7 +50,7 @@
 
 // Define EEPROM memory address location values for Grbl settings and parameters
 // NOTE: The Atmega328p has 1KB EEPROM. The upper half is reserved for parameters and
-// the startup script. The lower half contains the global settings and space for future 
+// the startup script. The lower half contains the global settings and space for future
 // developments.
 #define EEPROM_ADDR_GLOBAL 1
 #define EEPROM_ADDR_PARAMETERS 512
@@ -56,7 +66,8 @@
 
 // Global persistent settings (Stored from byte EEPROM_ADDR_GLOBAL onwards)
 typedef struct {
-  float steps_per_mm[3];
+/// 8c0
+  float steps_per_mm[N_AXIS];
   uint8_t microsteps;
   uint8_t pulse_microseconds;
   float default_feed_rate;

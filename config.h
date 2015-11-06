@@ -2,21 +2,29 @@
   config.h - compile time configuration
   Part of Grbl
 
-  Copyright (c) 2011-2013 Sungeun K. Jeon
+   The MIT License (MIT)
+
+  GRBL(tm) - Embedded CNC g-code interpreter and motion-controller
   Copyright (c) 2009-2011 Simen Svale Skogsrud
+  Copyright (c) 2011-2013 Sungeun K. Jeon
 
-  Grbl is free software: you can redistribute it and/or modify
-  it under the terms of the GNU General Public License as published by
-  the Free Software Foundation, either version 3 of the License, or
-  (at your option) any later version.
+  Permission is hereby granted, free of charge, to any person obtaining a copy
+  of this software and associated documentation files (the "Software"), to deal
+  in the Software without restriction, including without limitation the rights
+  to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+  copies of the Software, and to permit persons to whom the Software is
+  furnished to do so, subject to the following conditions:
 
-  Grbl is distributed in the hope that it will be useful,
-  but WITHOUT ANY WARRANTY; without even the implied warranty of
-  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-  GNU General Public License for more details.
+  The above copyright notice and this permission notice shall be included in
+  all copies or substantial portions of the Software.
 
-  You should have received a copy of the GNU General Public License
-  along with Grbl.  If not, see <http://www.gnu.org/licenses/>.
+  THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+  IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+  FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+  AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+  LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+  OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
+  THE SOFTWARE.
 */
 
 // This file contains compile-time configurations for Grbl's internal system. For the most part,
@@ -29,20 +37,38 @@
 #define config_h
 
 // Default settings. Used when resetting EEPROM. Change to desired name in defaults.h
-#define DEFAULTS_GENERIC
+// Do not use other configurations as 'DEFAULT_T_STEPS_PER_DEGREE' is not defined  !!!
+//#define DEFAULTS_GENERIC
+#define DEFAULTS_SANDER02
 
 // Serial baud rate
-#define BAUD_RATE 115200
+#define BAUD_RATE 57600
+
+/// 8c2  always upload defaults parameter -> 1
+#define ALWAYS_DEFAULTS_SETTINGS  0   /// 0 normal
+
+/// 8c1
+//==============================================================================
+/// This is where you define the type of the fourth axis T
+/// 	- T = axis U, V, W linear or  axis A, B, C rotary
+/// 	- The axis T uses MEGA2560 Digital pin 28
+
+  #define LINEAR 0		//  0 -> linear T = U or V or W
+  #define ROTARY 1		//  1 -> rotary T = A or B or C
+/// ====> You must choose on least one type, but not both  <====
+ //#define AXIS_T_TYPE 	LINEAR  	//  0 -> linear
+  #define AXIS_T_TYPE 	ROTARY 		//  1 -> rotary
 
 // Default pin mappings. Grbl officially supports the Arduino Uno only. Other processor types
 // may exist from user-supplied templates or directly user-defined in pin_map.h
-/// #define PIN_MAP_ARDUINO_UNO
-#define PIN_MAP_ARDUINO_MEGA_2560
+//#define PIN_MAP_ARDUINO_UNO
+//#define PIN_MAP_ARDUINO_MEGA_2560   ///mapping 0.845 + T axis
+#define PIN_MAP_ARDUINO_MEGA_2560_4   /// mapping 0.8c + T axis
 
 // Define runtime command special characters. These characters are 'picked-off' directly from the
 // serial read data stream and are not passed to the grbl line execution parser. Select characters
-// that do not and must not exist in the streamed g-code program. ASCII control characters may be 
-// used, if they are available per user setup. Also, extended ASCII codes (>127), which are never in 
+// that do not and must not exist in the streamed g-code program. ASCII control characters may be
+// used, if they are available per user setup. Also, extended ASCII codes (>127), which are never in
 // g-code programs, maybe selected for interface programs.
 // NOTE: If changed, manually update help message in report.c.
 #define CMD_STATUS_REPORT '?'
@@ -52,10 +78,10 @@
 
 // The temporal resolution of the acceleration management subsystem. Higher number give smoother
 // acceleration but may impact performance.
-// NOTE: Increasing this parameter will help any resolution related issues, especially with machines 
-// requiring very high accelerations and/or very fast feedrates. In general, this will reduce the 
+// NOTE: Increasing this parameter will help any resolution related issues, especially with machines
+// requiring very high accelerations and/or very fast feedrates. In general, this will reduce the
 // error between how the planner plans the motions and how the stepper program actually performs them.
-// However, at some point, the resolution can be high enough, where the errors related to numerical 
+// However, at some point, the resolution can be high enough, where the errors related to numerical
 // round-off can be great enough to cause problems and/or it's too fast for the Arduino. The correct
 // value for this parameter is machine dependent, so it's advised to set this only as high as needed.
 // Approximate successful values can range from 30L to 100L or more.
@@ -74,8 +100,8 @@
 
 // Time delay increments performed during a dwell. The default value is set at 50ms, which provides
 // a maximum time delay of roughly 55 minutes, more than enough for most any application. Increasing
-// this delay will increase the maximum dwell time linearly, but also reduces the responsiveness of 
-// run-time command executions, like status reports, since these are performed between each dwell 
+// this delay will increase the maximum dwell time linearly, but also reduces the responsiveness of
+// run-time command executions, like status reports, since these are performed between each dwell
 // time step. Also, keep in mind that the Arduino delay timer is not very accurate for long delays.
 #define DWELL_TIME_STEP 50 // Integer (1-255) (milliseconds)
 
@@ -92,9 +118,9 @@
 #define HOMING_RATE_ADJUST // Comment to disable
 
 // Define the homing cycle search patterns with bitmasks. The homing cycle first performs a search
-// to engage the limit switches. HOMING_SEARCH_CYCLE_x are executed in order starting with suffix 0 
-// and searches the enabled axes in the bitmask. This allows for users with non-standard cartesian 
-// machines, such as a lathe (x then z), to configure the homing cycle behavior to their needs. 
+// to engage the limit switches. HOMING_SEARCH_CYCLE_x are executed in order starting with suffix 0
+// and searches the enabled axes in the bitmask. This allows for users with non-standard cartesian
+// machines, such as a lathe (x then z), to configure the homing cycle behavior to their needs.
 // Search cycle 0 is required, but cycles 1 and 2 are both optional and may be commented to disable.
 // After the search cycle, homing then performs a series of locating about the limit switches to hone
 // in on machine zero, followed by a pull-off maneuver. HOMING_LOCATE_CYCLE governs these final moves,
@@ -106,7 +132,7 @@
 #define HOMING_LOCATE_CYCLE   ((1<<X_AXIS)|(1<<Y_AXIS)|(1<<Z_AXIS)) // Must contain ALL search axes
 
 // Number of homing cycles performed after when the machine initially jogs to limit switches.
-// This help in preventing overshoot and should improve repeatability. This value should be one or 
+// This help in preventing overshoot and should improve repeatability. This value should be one or
 // greater.
 #define N_HOMING_LOCATE_CYCLE 2 // Integer (1-128)
 
@@ -117,51 +143,54 @@
 #define N_STARTUP_LINE 2 // Integer (1-5)
 
 // ---------------------------------------------------------------------------------------
-// FOR ADVANCED USERS ONLY: 
+// FOR ADVANCED USERS ONLY:
 
 // The number of linear motions in the planner buffer to be planned at any give time. The vast
-// majority of RAM that Grbl uses is based on this buffer size. Only increase if there is extra 
+// majority of RAM that Grbl uses is based on this buffer size. Only increase if there is extra
 // available RAM, like when re-compiling for a Teensy or Sanguino. Or decrease if the Arduino
 // begins to crash due to the lack of available RAM or if the CPU is having trouble keeping
-// up with planning new incoming motions as they are executed. 
+// up with planning new incoming motions as they are executed.
+/// 8c1
 #ifdef PIN_MAP_ARDUINO_UNO
 	#define BLOCK_BUFFER_SIZE 18  // Uncomment to override default in planner.h.
 #else // PIN_MAP_ARDUINO_MEGA_2560
 	#define BLOCK_BUFFER_SIZE 36
 #endif
 
-// Line buffer size from the serial input stream to be executed. Also, governs the size of 
+// Line buffer size from the serial input stream to be executed. Also, governs the size of
 // each of the startup blocks, as they are each stored as a string of this size. Make sure
 // to account for the available EEPROM at the defined memory address in settings.h and for
 // the number of desired startup blocks.
-// NOTE: 70 characters is not a problem except for extreme cases, but the line buffer size 
-// can be too small and g-code blocks can get truncated. Officially, the g-code standards 
-// support up to 256 characters. In future versions, this default will be increased, when 
+// NOTE: 70 characters is not a problem except for extreme cases, but the line buffer size
+// can be too small and g-code blocks can get truncated. Officially, the g-code standards
+// support up to 256 characters. In future versions, this default will be increased, when
 // we know how much extra memory space we can re-invest into this.
+/// 8c1
 #ifdef PIN_MAP_ARDUINO_UNO
 	#define LINE_BUFFER_SIZE 70  // Uncomment to override default in protocol.h
-#else //PIN_MAP_ARDUINO_MEGA_2560
+#else // PIN_MAP_ARDUINO_MEGA_2560
 	#define LINE_BUFFER_SIZE 100
 #endif
 
 // Serial send and receive buffer size. The receive buffer is often used as another streaming
 // buffer to store incoming blocks to be processed by Grbl when its ready. Most streaming
-// interfaces will character count and track each block send to each block response. So, 
+// interfaces will character count and track each block send to each block response. So,
 // increase the receive buffer if a deeper receive buffer is needed for streaming and avaiable
 // memory allows. The send buffer primarily handles messages in Grbl. Only increase if large
 // messages are sent and Grbl begins to stall, waiting to send the rest of the message.
+/// 8c1
 #ifdef PIN_MAP_ARDUINO_UNO
 	#define RX_BUFFER_SIZE 128 // Uncomment to override defaults in serial.h
 	#define TX_BUFFER_SIZE 64
 #else //PIN_MAP_ARDUINO_MEGA_2560
 	#define RX_BUFFER_SIZE 256
-	#define TX_BUFFER_SIZE 128  
+	#define TX_BUFFER_SIZE 128
 #endif
 
 // Toggles XON/XOFF software flow control for serial communications. Not officially supported
 // due to problems involving the Atmega8U2 USB-to-serial chips on current Arduinos. The firmware
-// on these chips do not support XON/XOFF flow control characters and the intermediate buffer 
-// in the chips cause latency and overflow problems with standard terminal programs. However, 
+// on these chips do not support XON/XOFF flow control characters and the intermediate buffer
+// in the chips cause latency and overflow problems with standard terminal programs. However,
 // using specifically-programmed UI's to manage this latency problem has been confirmed to work.
 // As well as, older FTDI FT232RL-based Arduinos(Duemilanove) are known to work with standard
 // terminal programs since their firmware correctly manage these XON/XOFF characters. In any
@@ -169,15 +198,15 @@
 // #define ENABLE_XONXOFF // Default disabled. Uncomment to enable.
 
 // Creates a delay between the direction pin setting and corresponding step pulse by creating
-// another interrupt (Timer2 compare) to manage it. The main Grbl interrupt (Timer1 compare) 
-// sets the direction pins, and does not immediately set the stepper pins, as it would in 
-// normal operation. The Timer2 compare fires next to set the stepper pins after the step 
-// pulse delay time, and Timer2 overflow will complete the step pulse, except now delayed 
+// another interrupt (Timer2 compare) to manage it. The main Grbl interrupt (Timer1 compare)
+// sets the direction pins, and does not immediately set the stepper pins, as it would in
+// normal operation. The Timer2 compare fires next to set the stepper pins after the step
+// pulse delay time, and Timer2 overflow will complete the step pulse, except now delayed
 // by the step pulse time plus the step pulse delay. (Thanks langwadt for the idea!)
 //   This is an experimental feature that should only be used if your setup requires a longer
 // delay between direction and step pin settings (some opto coupler based drivers), as it may
-// adversely effect Grbl's high-end performance (>10kHz). Please notify Grbl administrators 
-// of your successes or difficulties, as we will monitor this and possibly integrate this as a 
+// adversely effect Grbl's high-end performance (>10kHz). Please notify Grbl administrators
+// of your successes or difficulties, as we will monitor this and possibly integrate this as a
 // standard feature for future releases. However, we suggest to first try our direction delay
 // hack/solution posted in the Wiki involving inverting the stepper pin mask.
 // NOTE: Uncomment to enable. The recommended delay must be > 3us and the total step pulse

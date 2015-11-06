@@ -1,5 +1,5 @@
 /*
-    Grbl_8cMega2560.ino BY LETARTARE
+    Grbl_8c2Mega2560.ino BY LETARTARE
     This file is an adaptation of Grbl-0.9d work with Arduino-xxx.
 
   Grbl is free software: you can redistribute it and/or modify
@@ -17,9 +17,9 @@
 /*
 
 	Supported hardware from config.h
-		Arduino Mega 2560 / 115200 bauds  (3 axis)
+		Arduino Mega 2560 / 56700 bauds  (4 axis)
     Supported sofware
-        grbl 0.8c 
+        grbl 0.8c2 = 0.8c + T Axis
 
 */
 

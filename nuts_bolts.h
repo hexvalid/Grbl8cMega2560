@@ -2,21 +2,29 @@
   nuts_bolts.h - Header file for shared definitions, variables, and functions
   Part of Grbl
 
+   The MIT License (MIT)
+
+  GRBL(tm) - Embedded CNC g-code interpreter and motion-controller
   Copyright (c) 2009-2011 Simen Svale Skogsrud
-  Copyright (c) 2011-2012 Sungeun K. Jeon  
+  Copyright (c) 2011-2013 Sungeun K. Jeon
 
-  Grbl is free software: you can redistribute it and/or modify
-  it under the terms of the GNU General Public License as published by
-  the Free Software Foundation, either version 3 of the License, or
-  (at your option) any later version.
+  Permission is hereby granted, free of charge, to any person obtaining a copy
+  of this software and associated documentation files (the "Software"), to deal
+  in the Software without restriction, including without limitation the rights
+  to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+  copies of the Software, and to permit persons to whom the Software is
+  furnished to do so, subject to the following conditions:
 
-  Grbl is distributed in the hope that it will be useful,
-  but WITHOUT ANY WARRANTY; without even the implied warranty of
-  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-  GNU General Public License for more details.
+  The above copyright notice and this permission notice shall be included in
+  all copies or substantial portions of the Software.
 
-  You should have received a copy of the GNU General Public License
-  along with Grbl.  If not, see <http://www.gnu.org/licenses/>.
+  THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+  IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+  FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+  AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+  LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+  OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
+  THE SOFTWARE.
 */
 
 #ifndef nuts_bolts_h
@@ -25,39 +33,54 @@
 #include <string.h>
 #include <stdint.h>
 #include <stdbool.h>
-#include "config.h"
+//#include "config.h"
 #include "defaults.h"
 #include "pin_map.h"
 
 #define false 0
 #define true 1
-
-#define N_AXIS 3 // Number of axes
+/// 8c0
+//#define N_AXIS 3 // Number of axes
+/// 8c1
+#define N_AXIS 4 // Number of axes
 #define X_AXIS 0 // Axis indexing value
 #define Y_AXIS 1
 #define Z_AXIS 2
+/// 8c1
+#define T_AXIS 3
+
 
 #define MM_PER_INCH (25.40)
 #define INCH_PER_MM (0.0393701)
 
 // Useful macros
 #define clear_vector(a) memset(a, 0, sizeof(a))
-#define clear_vector_float(a) memset(a, 0.0, sizeof(float)*N_AXIS)
+#define clear_vector_float(a) memset(a, 0.0, sizeof(float)*4)
 #define max(a,b) (((a) > (b)) ? (a) : (b))
 #define min(a,b) (((a) < (b)) ? (a) : (b))
 
 // Bit field and masking macros
-#define bit(n) (1 << n) 
+#define bit(n) (1 << n)
 #define bit_true(x,mask) (x |= mask)
 #define bit_false(x,mask) (x &= ~mask)
 #define bit_toggle(x,mask) (x ^= mask)
 #define bit_istrue(x,mask) ((x & mask) != 0)
 #define bit_isfalse(x,mask) ((x & mask) == 0)
+/// 8c1
+// set bit
+#define bit_1(port, r) (port |= (1 << r))
+#define bit_0(port, r) (port &= ~(1 << r))
+//#define bit_0_if(x, port, n ) (x==true ? port &= ~(1 << n):port |= (1 << n);)
+//#define bit_1_if(x, port, n ) (x==false ? port &= ~(1 << n):port |= (1 << n);)
+#define bit_out(data, r) (data |= (1 << r))
+#define bit_inp(data, r) (data &= ~(1 << r))
+/// <--
 
-// Define system executor bit map. Used internally by runtime protocol as runtime command flags, 
+
+// Define system executor bit map. Used internally by runtime protocol as runtime command flags,
 // which notifies the main program to execute the specified runtime command asynchronously.
 // NOTE: The system executor uses an unsigned 8-bit volatile variable (8 flag limit.) The default
-// flags are always false, so the runtime protocol only needs to check for a non-zero value to 
+// flags are always false, so the runtime protocol only needs to check for a non-zero value to
 // know when there is a runtime command to execute.
 #define EXEC_STATUS_REPORT  bit(0) // bitmask 00000001
 #define EXEC_CYCLE_START    bit(1) // bitmask 00000010
@@ -86,14 +109,14 @@ typedef struct {
   uint8_t abort;                 // System abort flag. Forces exit back to main loop for reset.
   uint8_t state;                 // Tracks the current state of Grbl.
   volatile uint8_t execute;      // Global system runtime executor bitflag variable. See EXEC bitmasks.
-  int32_t position[N_AXIS];      // Real-time machine (aka home) position vector in steps. 
-                                 // NOTE: This may need to be a volatile variable, if problems arise.   
+  int32_t position[4];      // Real-time machine (aka home) position vector in steps.
+                                 // NOTE: This may need to be a volatile variable, if problems arise.
   uint8_t auto_start;            // Planner auto-start flag. Toggled off during feed hold. Defaulted by settings.
 } system_t;
 extern system_t sys;
 
-// Read a floating point value from a string. Line points to the input buffer, char_counter 
-// is the indexer pointing to the current character of the line, while float_ptr is 
+// Read a floating point value from a string. Line points to the input buffer, char_counter
+// is the indexer pointing to the current character of the line, while float_ptr is
 // a pointer to the result variable. Returns true when it succeeds
 int read_float(char *line, uint8_t *char_counter, float *float_ptr);
 

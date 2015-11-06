@@ -2,25 +2,33 @@
   print.c - Functions for formatting output strings
   Part of Grbl
 
+   The MIT License (MIT)
+
+  GRBL(tm) - Embedded CNC g-code interpreter and motion-controller
   Copyright (c) 2009-2011 Simen Svale Skogsrud
-  Copyright (c) 2011-2012 Sungeun K. Jeon
+  Copyright (c) 2011-2013 Sungeun K. Jeon
 
-  Grbl is free software: you can redistribute it and/or modify
-  it under the terms of the GNU General Public License as published by
-  the Free Software Foundation, either version 3 of the License, or
-  (at your option) any later version.
+  Permission is hereby granted, free of charge, to any person obtaining a copy
+  of this software and associated documentation files (the "Software"), to deal
+  in the Software without restriction, including without limitation the rights
+  to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+  copies of the Software, and to permit persons to whom the Software is
+  furnished to do so, subject to the following conditions:
 
-  Grbl is distributed in the hope that it will be useful,
-  but WITHOUT ANY WARRANTY; without even the implied warranty of
-  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-  GNU General Public License for more details.
+  The above copyright notice and this permission notice shall be included in
+  all copies or substantial portions of the Software.
 
-  You should have received a copy of the GNU General Public License
-  along with Grbl.  If not, see <http://www.gnu.org/licenses/>.
+  THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+  IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+  FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+  AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+  LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+  OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
+  THE SOFTWARE.
 */
 
 /* This code was initially inspired by the wiring_serial module by David A. Mellis which
-   used to be a part of the Arduino project. */ 
+   used to be a part of the Arduino project. */
 
 
 #include <avr/pgmspace.h>
@@ -43,20 +51,20 @@ void printPgmString(const char *s)
 }
 
 // void printIntegerInBase(unsigned long n, unsigned long base)
-// { 
-// 	unsigned char buf[8 * sizeof(long)]; // Assumes 8-bit chars. 
+// {
+// 	unsigned char buf[8 * sizeof(long)]; // Assumes 8-bit chars.
 // 	unsigned long i = 0;
-// 
+//
 // 	if (n == 0) {
 // 		serial_write('0');
 // 		return;
-// 	} 
-// 
+// 	}
+//
 // 	while (n > 0) {
 // 		buf[i++] = n % base;
 // 		n /= base;
 // 	}
-// 
+//
 // 	for (; i > 0; i--)
 // 		serial_write(buf[i - 1] < 10 ?
 // 			'0' + buf[i - 1] :
@@ -64,7 +72,7 @@ void printPgmString(const char *s)
 // }
 
 void print_uint8_base2(uint8_t n)
-{ 
+{
 	unsigned char buf[8];
 	uint8_t i = 0;
 
@@ -78,20 +86,20 @@ void print_uint8_base2(uint8_t n)
 }
 
 static void print_uint32_base10(unsigned long n)
-{ 
-  unsigned char buf[10]; 
+{
+  unsigned char buf[10];
   uint8_t i = 0;
-  
+
   if (n == 0) {
     serial_write('0');
     return;
-  } 
-  
+  }
+
   while (n > 0) {
     buf[i++] = n % 10 + '0';
     n /= 10;
   }
-    
+
   for (; i > 0; i--)
     serial_write(buf[i-1]);
 }
@@ -108,7 +116,7 @@ void printInteger(long n)
 // Convert float to string by immediately converting to a long integer, which contains
 // more digits than a float. Number of decimal places, which are tracked by a counter,
 // may be set by the user. The integer is then efficiently converted to a string.
-// NOTE: AVR '%' and '/' integer operations are very efficient. Bitshifting speed-up 
+// NOTE: AVR '%' and '/' integer operations are very efficient. Bitshifting speed-up
 // techniques are actually just slightly slower. Found this out the hard way.
 void printFloat(float n)
 {
@@ -124,25 +132,25 @@ void printFloat(float n)
   }
   if (decimals) { n *= 10; }
   n += 0.5; // Add rounding factor. Ensures carryover through entire value.
-    
+
   // Generate digits backwards and store in string.
-  unsigned char buf[10]; 
+  unsigned char buf[10];
   uint8_t i = 0;
-  uint32_t a = (long)n;  
+  uint32_t a = (long)n;
   buf[settings.decimal_places] = '.'; // Place decimal point, even if decimal places are zero.
   while(a > 0) {
     if (i == settings.decimal_places) { i++; } // Skip decimal point location
     buf[i++] = (a % 10) + '0'; // Get digit
     a /= 10;
   }
-  while (i < settings.decimal_places) { 
+  while (i < settings.decimal_places) {
      buf[i++] = '0'; // Fill in zeros to decimal point for (n < 1)
   }
   if (i == settings.decimal_places) { // Fill in leading zero, if needed.
     i++;
-    buf[i++] = '0'; 
-  }   
-  
+    buf[i++] = '0';
+  }
+
   // Print the generated string.
   for (; i > 0; i--)
     serial_write(buf[i-1]);
